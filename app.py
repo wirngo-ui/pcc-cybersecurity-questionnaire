@@ -42,7 +42,7 @@ def init_db():
     con=sqlite3.connect(DB)
     con.execute("CREATE TABLE IF NOT EXISTS responses(id INTEGER PRIMARY KEY AUTOINCREMENT,submitted_at TEXT,role TEXT,sector TEXT,interview_interest TEXT,data_json TEXT)")
     con.commit(); con.close()
-
+init_db()
 def admin_required(fn):
     @wraps(fn)
     def w(*a,**k):
