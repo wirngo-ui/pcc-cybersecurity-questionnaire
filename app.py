@@ -50,18 +50,29 @@ def admin_required(fn):
         return fn(*a,**k)
     return w
 
-@app.route("/",methods=["GET","POST"])
+@app.route("/", methods=["GET", "POST"])
 def questionnaire():
-    if request.method=="POST":
-        data={}; errors=[]
-        for key,sec,typ,label,opts,req in Q:
-            val=request.form.getlist(key) if typ=="checkbox" else request.form.get(key,"").strip()
-            data[key]=val
-            if req and (not val if isinstance(val,str) else not val): errors.append(label)
-        if errors:
-            for x in errors[:5]: flash("Please answer: "+x,"error")
-            return render_template("questionnaire.html",Q=Q,SECTIONS=SECTIONS,LIKERT=LIKERT,data=data)
-        con = sqlite3.connect(DB)
+  if request.method == "POST":
+    data = {}
+    errors = []
+    for key, sec, typ, label, opts, req in Q:
+      val = (
+          request.form.getlist(key)
+          if typ == "checkbox"
+          else request.form.get(key, "").strip()
+      )
+      data[key] = val
+      if req and (not val if isinstance(val, str) else not val):
+        errors.append(label)
+
+    if errors:
+      for x in errors[:5]:
+        flash(f"Please answer: {x}", "error")
+      return render_template(
+          "questionnaire.html", q=Q, sections=SECTIONS, likert=LIKERT, data=data
+      )
+
+    con = sqlite3.connect(DB)
     con.execute(
         "CREATE TABLE IF NOT EXISTS responses (id INTEGER PRIMARY KEY"
         " AUTOINCREMENT, submitted_at TEXT, role TEXT, sector TEXT,"
@@ -81,6 +92,10 @@ def questionnaire():
     con.commit()
     con.close()
     return render_template("thanks.html")
+
+  return render_template(
+      "questionnaire.html", q=Q, sections=SECTIONS, likert=LIKERT, data={}
+  )
 
 @app.route("/admin/login",methods=["GET","POST"])
 def admin_login():
