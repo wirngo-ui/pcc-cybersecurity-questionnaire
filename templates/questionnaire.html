@@ -1,14 +1,113 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PCC Cybersecurity Questionnaire</title>
-<style>body{font-family:Arial;background:#f4f6f8;color:#172b4d;margin:0}.wrap{max-width:900px;margin:25px auto;padding:15px}.card{background:white;padding:25px;border-radius:12px;margin:15px 0;box-shadow:0 2px 10px #ddd}h1,h2{color:#17365d}.q{margin:22px 0}.qtitle{font-weight:600;display:block;margin-bottom:9px}.req{color:#b42318}.opt{display:block;margin:7px 0}input[type=text],input[type=email],select,textarea{width:100%;box-sizing:border-box;padding:10px;border:1px solid #ccd3dc;border-radius:6px}textarea{min-height:80px}.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.scale label{background:#f7f9fb;padding:8px;text-align:center;font-size:12px;border-radius:5px}button{background:#17365d;color:#fff;border:0;padding:13px 24px;border-radius:7px;font-size:16px}.notice{background:#eef6ff;padding:13px;border-left:4px solid #2563eb}.flash{background:#fff1f2;color:#9f1239;padding:10px;margin:8px 0;border-radius:6px}.small{font-size:13px;color:#667085}</style></head>
-<body><div class="wrap"><div class="card"><h1>Strategic Leadership, Digital Governance and Cybersecurity Preparedness</h1><p><b>Case Study: Presbyterian Church in Cameroon (PCC)</b></p><div class="notice">This questionnaire supports a PhD study on leadership, digital governance and cybersecurity preparedness across PCC multi-sector operations. Please answer from your professional experience. Do not enter passwords or authentication secrets.</div><p class="small">Estimated time: 10–15 minutes. Responses are saved automatically when submitted. Follow-up interview contact details are optional.</p></div>
-{% with messages=get_flashed_messages() %}{% for m in messages %}<div class="flash">{{m}}</div>{% endfor %}{% endwith %}
-<form method="post"><div class="card"><h2>Consent</h2><label class="opt"><input type="checkbox" required> I voluntarily agree to participate and understand that the research will use my responses according to the approved research and institutional/ethical procedures.</label></div>
-{% for code,title in SECTIONS %}<div class="card"><h2>{{code}}. {{title}}</h2>{% if code=="F" %}<p class="small">The research outline includes semi-structured interviews with selected executive administrative leaders and IT heads. This section creates the pool of potential interview participants.</p>{% endif %}
-{% for q in Q if q[1]==code %}<div class="q"><label class="qtitle">{{loop.index}}. {{q[3]}} {% if q[5] %}<span class="req">*</span>{% endif %}</label>
-{% if q[2] in ["text","email"] %}<input type="{{q[2]}}" name="{{q[0]}}" value="{{data.get(q[0],'')}}">
-{% elif q[2]=="textarea" %}<textarea name="{{q[0]}}">{{data.get(q[0],'')}}</textarea>
-{% elif q[2]=="select" %}<select name="{{q[0]}}"><option value="">-- Select --</option>{% for o in q[4] %}<option value="{{o}}" {% if data.get(q[0])==o %}selected{% endif %}>{{o}}</option>{% endfor %}</select>
-{% elif q[2]=="radio" %}{% for o in q[4] %}<label class="opt"><input type="radio" name="{{q[0]}}" value="{{o}}" {% if data.get(q[0])==o %}checked{% endif %}> {{o}}</label>{% endfor %}
-{% elif q[2]=="checkbox" %}{% for o in q[4] %}<label class="opt"><input type="checkbox" name="{{q[0]}}" value="{{o}}" {% if o in data.get(q[0],[]) %}checked{% endif %}> {{o}}</label>{% endfor %}
-{% elif q[2]=="likert" %}<div class="scale">{% for o in LIKERT %}<label><input type="radio" name="{{q[0]}}" value="{{o}}" {% if data.get(q[0])==o %}checked{% endif %}><br>{{o}}</label>{% endfor %}</div>{% endif %}</div>{% endfor %}</div>{% endfor %}
-<div class="card"><button type="submit">Submit Questionnaire</button></div></form></div></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PCC Cybersecurity Questionnaire</title>
+    <style>
+        body { font-family: Arial; background: #f4f6f8; color: #172b4d; margin: 0; }
+        .wrap { max-width: 900px; margin: 25px auto; padding: 15px; }
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
+        .q { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .qtitle { font-weight: bold; display: block; margin-bottom: 8px; }
+        .opt { display: block; margin-bottom: 5px; }
+        .flash { background: #ffebee; color: #c62828; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+        .req { color: #d32f2f; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="card">
+        <h1>Strategic Leadership, Digital Governance and Cybersecurity Preparedness</h1>
+        <p><b>Case Study Questionnaire</b></p>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for m in messages %}
+                <div class="flash">{{ m }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="post">
+        <div class="card">
+            <h2>Consent</h2>
+            <label class="opt">
+                <input type="checkbox" required> I voluntarily agree to participate in this research.
+            </label>
+        </div>
+
+        <div class="card">
+            <h2>Participant Information</h2>
+            <div class="q">
+                <label class="qtitle">Your Role</label>
+                <input type="text" name="role" value="{{ data.get('role', '') }}" style="width:100%; padding:8px;">
+            </div>
+            <div class="q">
+                <label class="qtitle">Sector</label>
+                <input type="text" name="sector" value="{{ data.get('sector', '') }}" style="width:100%; padding:8px;">
+            </div>
+        </div>
+
+        {% for code, title in SECTIONS %}
+        <div class="card">
+            <h2>{{ code }}. {{ title }}</h2>
+            
+            {% if code == "F" %}
+            <p class="small">The research outline includes...</p>
+            {% endif %}
+
+            {% for q in Q if q[1] == code %}
+            <div class="q">
+                <label class="qtitle">{{ loop.index }}. {{ q[3] }} {% if q[5] %}<span class="req">*</span>{% endif %}</label>
+
+                {% if q[2] in ["text", "email"] %}
+                <input type="{{ q[2] }}" name="{{ q[0] }}" value="{{ data.get(q[0], '') }}" style="width:100%; padding:8px;">
+
+                {% elif q[2] == "textarea" %}
+                <textarea name="{{ q[0] }}" style="width:100%; height:80px; padding:8px;">{{ data.get(q[0], '') }}</textarea>
+
+                {% elif q[2] == "select" %}
+                <select name="{{ q[0] }}" style="width:100%; padding:8px;">
+                    <option value="">-- Select --</option>
+                    {% for o in q[4] %}
+                    <option value="{{ o }}" {% if data.get(q[0]) == o %}selected{% endif %}>{{ o }}</option>
+                    {% endfor %}
+                </select>
+
+                {% elif q[2] == "radio" %}
+                    {% for o in q[4] %}
+                    <label class="opt">
+                        <input type="radio" name="{{ q[0] }}" value="{{ o }}" {% if data.get(q[0]) == o %}checked{% endif %}> {{ o }}
+                    </label>
+                    {% endfor %}
+
+                {% elif q[2] == "checkbox" %}
+                    {% for o in q[4] %}
+                    <label class="opt">
+                        <input type="checkbox" name="{{ q[0] }}" value="{{ o }}" {% if o in data.get(q[0], []) %}checked{% endif %}> {{ o }}
+                    </label>
+                    {% endfor %}
+
+                {% elif q[2] == "likert" %}
+                <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                    {% for o in LIKERT %}
+                    <label class="opt">
+                        <input type="radio" name="{{ q[0] }}" value="{{ o }}" {% if data.get(q[0]) == o %}checked{% endif %}> {{ o }}
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <div class="card">
+            <button type="submit" style="background:#0066cc; color:#fff; border:none; padding:12px 20px; font-size:16px; border-radius:4px; cursor:pointer;">Submit Questionnaire</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
