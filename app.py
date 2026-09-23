@@ -61,11 +61,26 @@ def questionnaire():
         if errors:
             for x in errors[:5]: flash("Please answer: "+x,"error")
             return render_template("questionnaire.html",Q=Q,SECTIONS=SECTIONS,LIKERT=LIKERT,data=data)
-        con=sqlite3.connect(DB)
-        con.execute("INSERT INTO responses VALUES(NULL,?,?,?,?,?)",(datetime.now(timezone.utc).isoformat(),data.get("role",""),data.get("sector",""),data.get("f1",""),json.dumps(data,ensure_ascii=False)))
-        con.commit(); con.close()
-        return render_template("thanks.html")
-    return render_template("questionnaire.html",Q=Q,SECTIONS=SECTIONS,LIKERT=LIKERT,data={})
+        con = sqlite3.connect(DB)
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS responses (id INTEGER PRIMARY KEY"
+        " AUTOINCREMENT, submitted_at TEXT, role TEXT, sector TEXT,"
+        " interview_interest TEXT, data TEXT)"
+    )
+    con.commit()
+    con.execute(
+        "INSERT INTO responses VALUES(NULL,?,?,?,?,?)",
+        (
+            datetime.now(timezone.utc).isoformat(),
+            data.get("role", ""),
+            data.get("sector", ""),
+            data.get("f1", ""),
+            json.dumps(data, ensure_ascii=False),
+        ),
+    )
+    con.commit()
+    con.close()
+    return render_template("thanks.html")
 
 @app.route("/admin/login",methods=["GET","POST"])
 def admin_login():
